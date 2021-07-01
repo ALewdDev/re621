@@ -14,17 +14,18 @@ const
 const toJSON = (string) =>
   JSON.parse(string);
 
+const destination = `./build/script.js`;
 
 const files = [
   `./bin/common-template.js`,
-  `./build/script.js`,
-  `./package.json`
+  `./package.json`,
+  destination
 ];
 
 
 //  Read Files
 
-const [ template , script , package ] = files.map((path) => readFileSync(path));
+const [ template , package , script ] = files.map((path) => readFileSync(path));
 
 
 //  Build JS
@@ -40,4 +41,4 @@ js += '\n';
 
 //  Write JS
 
-writeFileSync(scriptFile,js);
+writeFileSync(destination,js);

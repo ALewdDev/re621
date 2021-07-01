@@ -1,6 +1,5 @@
 import { XM } from '../api/XM';
 
-const { Storage } = XM;
 
 type Flag = 'enabled' | 'connect' | 'perform' | 'vivaldi';
 const flags = [ 'enabled' , 'connect' , 'perform' , 'vivaldi' ];
@@ -19,7 +18,7 @@ const nameOfType = (type: string) : string =>
 */
 
 const readSetting = async (type: string) =>
-  Debug[type] = Storage.getValue(nameOfType(type),false);
+  Debug[type] = XM.Storage.getValue(nameOfType(type),false);
 
 
 
@@ -29,7 +28,7 @@ const readSetting = async (type: string) =>
 
 const writeSetting = (type: string,enabled: boolean) : void => {
   enabled ||= undefined;
-  Storage.setValue(`re621.debug.${ type }`,enabled);
+  XM.Storage.setValue(`re621.debug.${ type }`,enabled);
 };
 
 

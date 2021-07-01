@@ -41,14 +41,14 @@ const responses = {
       }
     }
   }
-}
+};
 
 
 /*
     <async> <Promise> : Handle Background Messsage : (request) (respond)
 */
 
-async function handleBackgroundMessage(request: any,respond: Function): Promise<void> {
+async function handleBackgroundMessage(request: any,respond: any): Promise<void> {
 
   const { args , method , module , component , eventID } = request;
 
@@ -65,7 +65,7 @@ async function handleBackgroundMessage(request: any,respond: Function): Promise<
 
 // This has to be in a separate function because otherwise the port closes prematurely
 
-chrome.runtime.onMessage.addListener((request: any,_: any,callback: Function) => {
+chrome.runtime.onMessage.addListener((request: any,_: any,callback: any) => {
   handleBackgroundMessage(request,callback);
   return true;
 });
@@ -130,7 +130,7 @@ function xmlHttpNative(port: any,details: any) : void {
       return;
 
     let
-      msg: object,
+      msg: any,
       event = 'onerror';
 
     if(status >= 200 && status < 300){
@@ -140,7 +140,7 @@ function xmlHttpNative(port: any,details: any) : void {
       if(!allowedTypes.includes(responseType))
         responseXML = responseText = null;
 
-      if(responseType !== 'blob')
+      if(responseType === 'blob')
         response = URL.createObjectURL(response);
 
       const responseHeaders = request.getAllResponseHeaders();
@@ -180,7 +180,7 @@ function xmlHttpNative(port: any,details: any) : void {
       <any> : Create Response
   */
 
-  function createResponse(event: string,request: any,data?: any) : object {
+  function createResponse(event: string,request: any,data?: any) : any {
     const
       { status , finalURL , readyState , statusText } = request,
       result = { event , status , finalURL , readyState , statusText };
@@ -206,7 +206,7 @@ function xmlHttpNative(port: any,details: any) : void {
     Listen To ContentScript
 */
 
-const { onConnect } = chrome.runtime;
+const { onConnect } = runtime;
 
 onConnect.addListener((port: any) => {
 

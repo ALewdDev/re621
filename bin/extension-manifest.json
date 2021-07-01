@@ -4,6 +4,7 @@
   "name": "%DISPLAYNAME%",
   "short_name": "%NAME%",
   "version": "%VERSION%",
+  "version_name": "%VERSIONNAME%",
   "description": "%DESCRIPTION%",
   "author": "%AUTHOR%",
 

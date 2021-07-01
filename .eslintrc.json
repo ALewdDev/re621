@@ -57,7 +57,7 @@
     "@typescript-eslint/adjacent-overload-signatures": "error",
     "@typescript-eslint/consistent-type-assertions": "error",
     "@typescript-eslint/prefer-namespace-keyword": "error",
-    "@typescript-eslint/type-annotation-spacing": "error",
+    "@typescript-eslint/type-annotation-spacing": "off",
     "@typescript-eslint/member-delimiter-style": "error",
     "@typescript-eslint/triple-slash-reference": "error",
     "@typescript-eslint/no-array-constructor": "error",
@@ -96,7 +96,7 @@
 
     "prefer-rest-params": "error",
     "prefer-spread": "error",
-    "prefer-const": "error",
+    "prefer-const": "warn",
     "no-var": "error"
   }
 }

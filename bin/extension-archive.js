@@ -32,8 +32,8 @@ const [ template , build , package ] = [
 //  Build
 
 const
-  package = toJSON(readFileSync(package)),
-  stream = createWriteStream(parseTemplate(template,package));
+  config = toJSON(readFileSync(package)),
+  stream = createWriteStream(parseTemplate(template,config));
 
 
 //  Write

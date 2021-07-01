@@ -19,3 +19,9 @@ For a complete feature overview visit the projects website, found under [re621.b
 ## Contributing
 
 Contributions are always welcome. For bug reports, suggestions, and feature requests, head on over to the [issue tracker](https://github.com/bitWolfy/re621/issues).
+
+
+## Building
+
+- Clone
+- In repo folder run `npm i && npm run build:prod`
