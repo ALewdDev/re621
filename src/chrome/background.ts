@@ -1,65 +1,75 @@
 /**
  * ===== Single-response functions =====
- * Executed upon being called, send a response, then terminate.  
+ * Executed upon being called, send a response, then terminate.
  * Must be called from XM.Chrome.execBackgroundRequest()
  */
 
-declare const chrome;
+declare const chrome : any;
 
-/** Function index */
-const sRespFn = {
-    "XM": {
-        "Util": {
-            "openInTab": (path, active): Promise<boolean> => {
-                return new Promise((resolve) => {
-                    chrome.tabs.query({ active: true, windowType: "normal", currentWindow: true }, function (data) {
-                        chrome.tabs.create({
-                            url: path,
-                            active: active,
-                            index: typeof data[0] === "undefined" ? undefined : data[0].index + 1,
-                        }, () => { resolve(true); });
-                    })
-                });
-            },
-            "setClipboard": (data): void => {
-                const copyFrom = document.createElement("textarea");
-                copyFrom.textContent = data;
-                document.body.appendChild(copyFrom);
-                copyFrom.select();
-                document.execCommand("copy");
-                copyFrom.blur();
-                document.body.removeChild(copyFrom);
-            }
-        },
-    },
-}
+const { tabs , runtime } = chrome;
 
-async function handleBackgroundMessage(request, sender, sendResponse): Promise<void> {
+const { body } = document;
 
-    if (sRespFn[request.component] === undefined ||
-        sRespFn[request.component][request.module] === undefined ||
-        sRespFn[request.component][request.module][request.method] === undefined) {
+const tabQuery = {
+  active: true,
+  currentWindow: true,
+  windowType: 'normal'
+};
 
-        sendResponse({
-            eventID: request.eventID,
-            data: "RE6 Background - Invalid Request",
-        });
-        return;
+const responses = {
+  XM: {
+    Util: {
+      openInTab: (url: string,active: boolean) : Promise<boolean> => {
+        return new Promise((resolve) => {
+          tabs.query(tabQuery,(data: any) => {
+            let index: number;
+
+            if(typeof data[0] !== 'undefined')
+              index = data[0] + 1;
+
+            tabs.create({ url , active , index },() => resolve(true));
+          });
+        })
+      },
+      setClipboard: (data: string) : void => {
+        const source = document.createElement('textarea');
+        source.textContent = data;
+        body.appendChild(source);
+        document.execCommand('copy');
+        source.blur();
+        body.removeChild(source);
+      }
     }
-
-    sendResponse({
-        eventID: request.eventID,
-        data: await sRespFn[request.component][request.module][request.method](...request.args),
-    });
-
-    return;
+  }
 }
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    // This has to be in a separate function because otherwise the port closes prematurely
-    handleBackgroundMessage(request, sender, sendResponse);
+
+/*
+    <async> <Promise> : Handle Background Messsage : (request) (respond)
+*/
+
+async function handleBackgroundMessage(request: any,respond: Function): Promise<void> {
+
+  const { args ,method , module , component , eventID } = request;
+
+  const response = responses?.[component]?.[module]?.[method];
+
+  let data = `RE6 Background - Invalid Request`;
+
+  if(response)
+    data = await response(...args);
+
+  respond({ eventID , data });
+}
+
+
+// This has to be in a separate function because otherwise the port closes prematurely
+
+chrome.runtime.onMessage.addListener((request: any,_: any,callback: Function) => {
+    handleBackgroundMessage(request,callback);
     return true;
 });
+
 
 /**
  * ===== Multi-response functions =====
@@ -69,91 +79,147 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 /**
  * Process an xmlHttpRequest
- * @param {string} port 
- * @param {object} details 
+ * @param { object } port
+ * @param { object } details
  */
-function xmlHttpNative(port, details: any): void {
-    const request = new XMLHttpRequest();
 
-    /** **onabort** callback to be executed if the request was aborted */
-    request.onabort = (): void => { port.postMessage(createResponse("onabort", request)); }
+function xmlHttpNative(port: any,details: any) : void {
 
-    /** **onerror** callback to be executed if the request ended up with an error */
-    request.onerror = (): void => { port.postMessage(createResponse("onerror", request)); }
+  const allowedTypes = [ '' , 'document' ];
 
-    /** **onloadstart** callback to be executed if the request started to load */
-    request.onloadstart = (): void => { port.postMessage(createResponse("onloadstart", request)); }
+  const { data , method , url , username , password , headers , responseType , overrideMimeType } = details;
 
-    /** **onprogress** callback to be executed if the request made some progress */
-    request.onprogress = (event): void => {
-        port.postMessage(createResponse("onprogress", request, {
-            // Sometimes, total is 0. If it is, the length cannot be computed.
-            lengthComputable: event.total > 0,
-            loaded: event.loaded,
-            total: event.total,
-        }));
+
+  const request = new XMLHttpRequest();
+
+
+  /**
+      Post reponse when even is fired.
+  */
+
+  const responseEvents = [ 'onabort' , 'onerror' , 'onloadstart' , 'onreadystatechange' , 'ontimeout' ];
+
+  for(const event of responseEvents)
+    request[event] = () : void => postResponse(event);
+
+
+
+  /** **onprogress**
+    callback to be executed if the request made some progress
+  */
+
+  request.onprogress = (event) : void => {
+    const { total , loaded } = event;
+
+    // Sometimes, total is 0. If it is, the length cannot be computed.
+
+    const msg = { total , loaded , lengthComputable: total > 0 };
+
+    port.postMessage(createResponse('onprogress',request,msg));
+  }
+
+
+  /** **onload**
+    callback to be executed if the request was loaded.
+  */
+
+  request.onload = () : void => {
+    let { status , response , readyState , responseXML , responseText , responseType } = request;
+
+    if(readyState !== 4)
+      return;
+
+    let
+      msg: object,
+      event = 'onerror';
+
+    if(status >= 200 && status < 300){
+
+      event = 'onload';
+
+      if(!allowedTypes.includes(responseType))
+        responseXML = responseText = null;
+
+      if(responseType !== 'blob')
+        response = URL.createObjectURL(response);
+
+      const responseHeaders = request.getAllResponseHeaders();
+
+      msg = { response , responseXML , responseText , responseHeaders };
     }
 
-    /** **onreadystatechange** callback to be executed if the request's ready state changed */
-    request.onreadystatechange = (): void => { port.postMessage(createResponse("onreadystatechange", request)); };
+    postResponse(event,msg);
+  }
 
-    /** **ontimeout** callback to be executed if the request failed due to a timeout */
-    request.ontimeout = (): void => { port.postMessage(createResponse("ontimeout", request)); }
 
-    /** **onload** callback to be executed if the request was loaded. */
-    request.onload = (): void => {
-        if (request.readyState !== 4) return;
-        if (request.status >= 200 && request.status < 300) {
-            port.postMessage(createResponse("onload", request, {
-                responseHeaders: request.getAllResponseHeaders(),
-                response: (request.responseType === "blob") ? URL.createObjectURL(request.response) : request.response,
-                responseXML: (request.responseType === "" || request.responseType === "document") ? request.responseXML : null,
-                responseText: (request.responseType === "" || request.responseType === "document") ? request.responseText : null,
-            }));
-        } else {
-            port.postMessage(createResponse("onerror", request));
-        }
-    }
+  // Open
 
-    request.open(details.method, details.url, true, details.username, details.password);
-    delete details.headers["User-Agent"];
-    Object.keys(details.headers).forEach((header) => {
-        request.setRequestHeader(header, details.headers[header]);
-    });
+  request.open(method,url,true,username,password);
 
-    if (details.responseType) // ArrayBuffer gets fetched as a blob, for the sake of converting to ObjectURL
-        request.responseType = (details.responseType === "arraybuffer") ? "blob" : details.responseType;
+  delete headers['User-Agent'];
 
-    if (details.overrideMimeType) request.overrideMimeType(details.overrideMimeType);
 
-    request.send(details.data);
+  // Request Header
 
-    function createResponse(event, request, data?: any): any {
-        const result = {
-            event: event,
-            finalURL: request.finalURL,
-            state: request.readyState,
-            status: request.status,
-            statusText: request.statusText,
-        };
+  for(const header in headers)
+    request.setRequestHeader(header,headers[header]);
 
-        if (data !== undefined)
-            Object.keys(data).forEach((key) => { result[key] = data[key]; });
 
-        return result;
-    }
+  // ArrayBuffer -> Blob (ObjectURL Conversion)
+
+  if(responseType)
+    request.responseType = (responseType === 'arraybuffer') ? 'blob' : responseType;
+
+  if(overrideMimeType)
+    request.overrideMimeType(overrideMimeType);
+
+  request.send(data);
+
+
+  /*
+      <any> : Create Response
+  */
+
+  function createResponse(event: string,request: any,data?: any) : object {
+    const
+      { status , finalURL , readyState , statusText } = request,
+      result = { event , status , finalURL , readyState , statusText };
+
+    for(const key in data)
+      result[key] = data[key];
+
+    return result;
+  }
+
+
+  /*
+      <void> : Post Response
+  */
+
+  function postResponse(eventType: string,msg?: any) : void {
+    port.postMessage(createResponse(eventType,request,msg));
+  }
 }
 
-chrome.runtime.onConnect.addListener((port) => {
 
-    if (port.name === "XHR") {
-        port.onMessage.addListener((message) => { xmlHttpNative(port, message) });
-        return;
-    }
+/*
+    Listen To ContentScript
+*/
 
+const { onConnect } = chrome.runtime;
+
+onConnect.addListener((port: any) => {
+
+  const { name , onMessage } = port;
+
+  switch(name){
+  case 'XHR':
+    onMessage.addListener((msg: any) => xmlHttpNative(port,msg));
+    return;
+  default:
     port.postMessage({
-        eventID: 0,
-        data: "RE6 Background - Invalid Request",
+      eventID: 0,
+      data: `RE6 Background - Invalid Request`
     });
-
+  }
 });

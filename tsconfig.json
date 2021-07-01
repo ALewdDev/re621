@@ -1,14 +1,17 @@
 {
-    "compilerOptions": {
-        "module": "CommonJS",
-        "moduleResolution": "node",
-        "target": "ES2019",
-        "outDir": "./build/tsc-temp/",
-        "rootDir": "./src/",
-        "removeComments": true,
-        "typeRoots": [
-            "node_modules/@types",
-            "node_modules/@shopify"
-        ]
-    }
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "target": "ES2019",
+
+    "outDir": "./build/tsc-temp/",
+    "rootDir": "./src/",
+
+    "removeComments": true,
+
+    "typeRoots": [
+      "node_modules/@types",
+      "node_modules/@shopify"
+    ]
+  }
 }

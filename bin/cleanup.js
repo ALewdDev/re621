@@ -1,4 +1,15 @@
-const fs = require("fs");
 
-if (fs.existsSync("./build/tsc-temp"))
-    fs.rmdirSync("./build/tsc-temp/", { recursive: true });
+/*
+    Cleanup
+    -------
+
+    Removes temporary build folders.
+*/
+
+
+const { rmdirSync } = require('fs');
+
+const tempFolder = `./build/tsc-temp`;
+
+
+rmdirSync(tempFolder,{ recursive: true });
