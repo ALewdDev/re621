@@ -50,7 +50,7 @@ const responses = {
 
 async function handleBackgroundMessage(request: any,respond: Function): Promise<void> {
 
-  const { args ,method , module , component , eventID } = request;
+  const { args , method , module , component , eventID } = request;
 
   const response = responses?.[component]?.[module]?.[method];
 
@@ -66,8 +66,8 @@ async function handleBackgroundMessage(request: any,respond: Function): Promise<
 // This has to be in a separate function because otherwise the port closes prematurely
 
 chrome.runtime.onMessage.addListener((request: any,_: any,callback: Function) => {
-    handleBackgroundMessage(request,callback);
-    return true;
+  handleBackgroundMessage(request,callback);
+  return true;
 });
 
 
