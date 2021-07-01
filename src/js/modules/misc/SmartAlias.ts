@@ -5,7 +5,7 @@ import { AvoidPosting } from "../../components/cache/AvoidPosting";
 import { TagCache } from "../../components/cache/TagCache";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { RE6Module, Settings } from "../../components/RE6Module";
-import { TagValidator } from "../../components/utility/TagValidator";
+import TagValidator from "../../components/utility/TagValidator";
 import { Util } from "../../components/utility/Util";
 
 export class SmartAlias extends RE6Module {
@@ -92,7 +92,7 @@ export class SmartAlias extends RE6Module {
     }
 
     /**
-     * Destroys and re-creates the entire module as a method of reloading it.  
+     * Destroys and re-creates the entire module as a method of reloading it.
      * It's stupid, but it's the easiest and hassle-free method of resetting some things.
      */
     public async reload(): Promise<void> {
@@ -524,7 +524,7 @@ export class SmartAlias extends RE6Module {
 
 
         /**
-         * Fix for Vue data-attribute binding  
+         * Fix for Vue data-attribute binding
          * This needs to be executed every time the textarea value gets changed
          * @param $textarea Textarea input
          */
@@ -671,7 +671,7 @@ export class SmartAlias extends RE6Module {
     }
 
     /**
-     * Processes the raw text value of the custom alias field and converts it into machine-readable format.  
+     * Processes the raw text value of the custom alias field and converts it into machine-readable format.
      * TODO Optimize this as much as possible
      * @param rawData Raw plaintext data
      */
@@ -741,7 +741,7 @@ export class SmartAlias extends RE6Module {
     }
 
     /**
-     * Replaces the custom aliases with their consequent values.  
+     * Replaces the custom aliases with their consequent values.
      * Note that an alias cache must be built beforehand via `loadAliasCache()`
      * @param text Text to parse
      */

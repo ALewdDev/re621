@@ -1,11 +1,13 @@
-import { Util } from "./Util";
+import { Util } from './Util';
+
+
 
 export class UtilID {
 
     private static uniqueIDs: Set<string> = new Set();
 
     /**
-     * Creates a random string of letters, to be used as an ID.  
+     * Creates a random string of letters, to be used as an ID.
      * @param length String length. Defaults to 8
      * @param unique If false, simply returns a randomized string
      */
@@ -38,7 +40,7 @@ export class UtilID {
     }
 
     /**
-     * Remove the provided ID from the records.  
+     * Remove the provided ID from the records.
      * Make sure that the corresponding element has also been removed, to avoid possible collisions
      * @param id String ID to remove
      * @returns true if the ID existed, false otherwise

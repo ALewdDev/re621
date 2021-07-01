@@ -2,7 +2,7 @@ import { UtilDOM } from "./UtilDOM";
 import { UtilEvents } from "./UtilEvents";
 import { UtilID } from "./UtilID";
 import { UtilMath } from "./UtilMath";
-import { UtilNetwork } from "./UtilNetwork";
+import Network from "./Network";
 import { UtilSize } from "./UtilSize";
 import { UtilTime } from "./UtilTime";
 
@@ -15,7 +15,7 @@ export class Util {
     public static Events = UtilEvents;
     public static ID = UtilID;
     public static Math = UtilMath;
-    public static Network = UtilNetwork;
+    public static Network = Network;
     public static Time = UtilTime;
     public static Size = UtilSize;
 
@@ -47,8 +47,8 @@ export class Util {
     }
 
     /**
-     * Split the array into chunks of specified size.  
-     * The `method` parameter defines how the array is split.  
+     * Split the array into chunks of specified size.
+     * The `method` parameter defines how the array is split.
      * - "balance": the chunks are at most `size` big, but otherwise of equal size
      * - "chunk": all chunks except for the last one of equal size
      * - "split": first chunk is `size` big, the second contains the remainder
@@ -97,7 +97,7 @@ export class Util {
     }
 
     /**
-     * Convert markdown input into html.  
+     * Convert markdown input into html.
      * Very limited in scope, don't rely on this for anything important.
      * @param input Markdown input
      * @returns HTML output
@@ -140,7 +140,7 @@ export class Util {
     }
 
     /**
-     * Trims the thousands off a number and replaced them with a K.  
+     * Trims the thousands off a number and replaced them with a K.
      * ex. 54321 -> 54.3k
      * @param num Number to trim
      */
@@ -217,14 +217,14 @@ export class Util {
      * @param v2 The second version to be compared.
      * @param [options] Optional flags that affect comparison behavior:
      *      `lexicographical` _boolean_ compares each part of the version strings lexicographically instead of
-     *      naturally; this allows suffixes such as "b" or "dev" but will cause "1.10" to be considered smaller than "1.2".  
+     *      naturally; this allows suffixes such as "b" or "dev" but will cause "1.10" to be considered smaller than "1.2".
      *      `zeroExtend` _boolean_ changes the result if one version string has less parts than the other. In
-     *         this case the shorter string will be padded with "zero" parts instead of being considered smaller.  
+     *         this case the shorter string will be padded with "zero" parts instead of being considered smaller.
      * @returns {number|NaN}
-     *      - 0 if the versions are equal  
-     *      - a negative integer iff v1 < v2  
-     *      - a positive integer iff v1 > v2  
-     *      - NaN if either version string is in the wrong format  
+     *      - 0 if the versions are equal
+     *      - a negative integer iff v1 < v2
+     *      - a positive integer iff v1 > v2
+     *      - NaN if either version string is in the wrong format
      * @copyright by Jon Papaioannou (`john.papaioannou@gmail.com`)
      * @license This function is in the public domain. Do what you want with it, no strings attached.
      */
@@ -264,7 +264,7 @@ export class Util {
     }
 
     /**
-     * Formats an array into a string via a non-standard join method.  
+     * Formats an array into a string via a non-standard join method.
      * Ex. ["one"] => "one"
      *     ["one", "two"] => "one and two"
      *     ["one", "two", "three"] => "one, two, and three"
